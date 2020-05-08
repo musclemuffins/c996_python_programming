@@ -2,10 +2,11 @@ from bs4 import BeautifulSoup
 import requests, csv, re, urllib.parse, os
 
 WEB_LINK = "http://www.census.gov/programs-surveys/popest.html"
-
+HTML_FILE_PATH = os.path.join(os.getcwd(), 'CurrentEstimates.html')
+# use 'os' module for file path for compatibility between linux and windows
 
 # download html file if not found locally
-if not os.path.isfile('./CurrentEstimates.html'):
+if not os.path.isfile(HTML_FILE_PATH):
     try:
         res = requests.get(WEB_LINK)
         res.raise_for_status()
@@ -19,18 +20,17 @@ if not os.path.isfile('./CurrentEstimates.html'):
 
 # create beautifulsoup object from local html document
 try:
-    html_soup = BeautifulSoup(open('./CurrentEstimates.html'), 'html.parser')
+    html_soup = BeautifulSoup(open(HTML_FILE_PATH), 'html.parser')
 except Exception as exc:
     print('There was a problem createing the BeautifulSoup object: %s' % (exc))
-
 
 # get all links and add them to a list
 list_of_links = []
 for link in html_soup.find_all('a'):
     link = link.get('href')
-    link = urllib.parse.urljoin(WEB_LINK, link)     # convert relative to absolute URL's
+    link = urllib.parse.urljoin(WEB_LINK, link)
+    # ^convert relative to absolute URL's
     list_of_links.append(link)
-
 
 html_regex = re.compile(r'(#.*$)')      # Search for links ending with '#anycharacters'
 filtered_links = []
@@ -39,10 +39,8 @@ for link in list_of_links:
     if match_object is None:            # If link doesn't end with '#something', then append
         filtered_links.append(link)
 
-
 filtered_links = set(filtered_links)        # Remove duplicates
 filtered_links = sorted(filtered_links)     # Sort values
-
 
 output_file = open('output.csv', 'w', newline='')
 output_writer = csv.writer(output_file)
