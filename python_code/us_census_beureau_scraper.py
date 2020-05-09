@@ -32,12 +32,14 @@ for link in html_soup.find_all('a'):
     # ^convert relative to absolute URL's
     list_of_links.append(link)
 
-html_regex = re.compile(r'(#.*$)')      # Search for links ending with '#anycharacters'
+html_regex = re.compile(r'(.*)(#.*$)')      # Search for links ending with '#anycharacters'
 filtered_links = []
 for link in list_of_links:
     match_object = html_regex.search(link)
     if match_object is None:            # If link doesn't end with '#something', then append
         filtered_links.append(link)
+    else:                               # If link does end with '#something', then append group 1 of regex
+        filtered_links.append(match_object.group(1))
 
 filtered_links = set(filtered_links)        # Remove duplicates
 filtered_links = sorted(filtered_links)     # Sort values
